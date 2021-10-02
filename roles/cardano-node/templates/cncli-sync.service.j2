@@ -1,0 +1,19 @@
+[Unit]
+Description=CNCLI Sync
+After=multi-user.target
+
+[Service]
+User                    = {{ server_username }}
+Type                    = simple
+Restart                 = always
+RestartSec              = 5
+LimitNOFILE             = 131072
+ExecStart               = /usr/local/bin/cncli sync --host 127.0.0.1 --port {{ cardano_default_port }} --db /opt/cardano/cnodes/scripts/cncli.db
+KillSignal              = SIGINT
+SuccessExitStatus       = 143
+StandardOutput          = syslog
+StandardError           = syslog
+SyslogIdentifier        = cncli-sync
+
+[Install]
+WantedBy                = multi-user.target

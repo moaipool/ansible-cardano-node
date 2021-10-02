@@ -1,0 +1,25 @@
+# The Cardano node service (part of systemd)
+# file: /etc/systemd/system/cardano-node.service 
+
+[Unit]
+Description     = Cardano Node
+Documentation   = https://github.com/osodevops/aws-terraform-module-cardano-stake-pool
+After           = network-online.target
+Wants           = network-online.target
+
+[Service]
+Type            = simple
+PrivateTmp      = true
+ExecStart       = /opt/cardano/cnode/scripts/start-node.sh
+ExecStop        = /opt/cardano/cnode/scripts/stop-node.sh
+PIDFile         = /run/cardano/%i.pid
+User            = {{ server_username }} 
+Group           = {{ server_username }}
+ProtectHome     = true
+Restart         = on-failure
+StartLimitBurst = 3
+StartLimitInterval= 60s
+SyslogIdentifier=cardano-node
+
+[Install]
+WantedBy        = multi-user.target

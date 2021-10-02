@@ -1,0 +1,5 @@
+# Cardano relay node group_vars 
+---
+
+# hostname
+server_hostname: cnode-relay002

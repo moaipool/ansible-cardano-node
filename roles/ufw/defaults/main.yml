@@ -1,0 +1,11 @@
+---
+
+# Relay node public IP addresses
+relay_node_ips:
+  - 127.0.0.1/32  #relay1.mypool.com
+  - 127.0.0.2/32  #relay2.mypool.com
+
+# Trusted IP addresses, used for remote access/administration
+trusted_ips:
+  - 127.0.10.1/32
+  - 127.0.10.2/32

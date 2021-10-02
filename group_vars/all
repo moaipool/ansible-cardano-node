@@ -1,0 +1,9 @@
+---
+# Cross-environent variables are stored here
+
+# ports 
+ssh_port: "22"
+cardano_default_port: "6000"
+
+# credentials
+deploy_password: "{{ vault_deploy_password }}"

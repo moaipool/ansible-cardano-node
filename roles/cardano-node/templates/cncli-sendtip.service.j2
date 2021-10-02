@@ -1,0 +1,19 @@
+[Unit]
+Description=CNCLI Sendtip
+After=multi-user.target
+
+[Service]
+User                    = {{ server_username }}
+Type                    = simple
+Restart                 = always
+RestartSec              = 5
+LimitNOFILE             = 131072
+ExecStart               = /usr/local/bin/cncli sendtip --cardano-node /usr/bin/cardano-node --config /opt/cardano/cnode/scripts/pooltool.json
+KillSignal              = SIGINT
+SuccessExitStatus       = 143
+StandardOutput          = syslog
+StandardError           = syslog
+SyslogIdentifier        = cncli-sendtip
+
+[Install]
+WantedBy                = multi-user.target

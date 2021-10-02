@@ -1,0 +1,198 @@
+---
+- name: "Server Setup | Set timezone to UTC"
+  timezone:
+    name: UTC
+  tags:
+    - prebuild
+
+- name: "Server Setup | Set hostname of installer to static value"
+  command: "hostnamectl set-hostname {{ server_hostname }} --static"
+  tags:
+    - prebuild
+
+- name: "Server Setup | Create .local/bin directory for {{ server_username }} user"
+  file:
+    path: "/home/{{ server_username }}/.local/bin"
+    state: directory
+    mode: 0700
+    owner: "{{ server_username }}"
+  tags:
+    - prebuild
+
+- name: "Package Install | Install Dependencies"
+  apt:
+    pkg:
+      - automake
+      - build-essential
+      - pkg-config
+      - libffi-dev
+      - libgmp-dev
+      - libssl-dev
+      - libtinfo-dev
+      - libsystemd-dev
+      - zlib1g-dev
+      - make
+      - g++
+      - tmux
+      - git
+      - jq
+      - wget
+      - libncursesw5
+      - libncurses-dev
+      - libsodium-dev
+      - libtinfo5
+      - libtool
+      - autoconf
+      - tcptraceroute
+      - bmon
+    state: latest
+  become: true
+  tags:
+    - packages
+    - install
+
+- name: "Package Install | Upgrade all packages"
+  apt:
+    name: '*'
+    state: latest
+  tags:
+    - packages
+    - install
+
+- name: "Node Install | Download Cabal {{ cabal_install_version }}"
+  unarchive:
+    src: "{{ cabal_install_url }}"
+    dest: /usr/bin
+    remote_src: yes
+  tags:
+    - install
+
+- name: "Node Install | Add local bin dir to system-wide $PATH."
+  copy:
+    dest: /etc/profile.d/custom-path.sh
+    content: 'PATH=$PATH:/home/{{ server_username }}/.local/bin'
+  tags:
+    - install
+
+- name: "Node Install | Download GHC {{ ghc_install_version }}"
+  unarchive:
+    src: "{{ ghc_install_url }}"
+    dest: /home/{{ server_username }}
+    remote_src: yes
+  tags:
+    - install
+
+- name: "Node Install | Configure, build GHC {{ ghc_install_version }}"
+  shell: |
+    cd /home/{{ server_username }}/ghc-{{ ghc_install_version }}
+    ./configure
+    sudo make install
+  tags:
+    - install
+
+- name: "Node Install | Create Symlink to GHC binary"
+  file:
+    src: "/usr/local/bin/ghc-{{ ghc_install_version }}"
+    dest: "/usr/bin/ghc"
+    state: link
+    force: yes
+  tags:
+    - install
+        
+# Note: github_release requires annoyingly unpackaged python module requirement github3.py
+# curl is used here instead
+# - name: "Node Install | Fetch Cardano source latest release tag"
+#   shell:
+#     #cmd: curl --silent "{{ cardano_github_release_url }}" |  grep '"tag_name":' | cut -d'"' -f4
+#     cmd: curl --silent "{{ cardano_github_release_url }}" | grep -Po '"tag_name": "\K.*?(?=")'
+#     warn: false
+#   register: shell_output
+#   tags:
+#     - install
+#     - node
+
+# - name: "Node Install | Set fact Cardano latest release tag"
+#   set_fact:
+#     cardano_release_tag: "{{ shell_output.stdout_lines }}"
+#   tags:
+#     - install
+#     - node
+
+- name: "Node Install | Release version {{ cardano_version_tag }}"
+  debug:
+    var: cardano_version_tag
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Delete cardano-node build directory"
+  file:
+    state: absent
+    path: /home/{{ server_username }}/cardano-node
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Git checkout Cardano source release version {{ cardano_version_tag }}"
+  git:
+    repo: "{{ cardano_github_repo }}"
+    dest: /home/{{ server_username }}/cardano-node
+    clone: yes
+    version: "{{ cardano_version_tag }}"
+    accept_hostkey: yes
+  register: repo_download
+  tags:
+    - install
+    - node
+    - git
+
+- name: "Node Install | Create cabal.project.local at toplevel"
+  template:
+    src: "{{ role_path }}/templates/cabal.project.local.j2"
+    dest: "/home/{{ server_username }}/cardano-node/cabal.project.local"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0644
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Update Cabal in {{ server_username }} home directory"
+  shell: cd /home/{{ server_username }}/cardano-node && cabal update
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Building Cardano node"
+  shell: cd /home/{{ server_username }}/cardano-node && cabal build cardano-node cardano-cli
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Stop cardano-node service"
+  systemd:
+    name: cardano-node.service
+    state: stopped
+  tags:
+    - binaries
+    - install
+    - node
+
+- name: "Node Install | Copy binaries to /usr/bin for systemd control"
+  shell: |
+    cp $(find /home/{{ server_username }}/cardano-node/dist-newstyle/build -type f -name "cardano-cli") /usr/bin/cardano-cli
+    cp $(find /home/{{ server_username }}/cardano-node/dist-newstyle/build -type f -name "cardano-node") /usr/bin/cardano-node
+  tags:
+    - binaries
+    - install
+    - node
+
+- name: "Node Install | Start cardano-node service"
+  systemd:
+    name: cardano-node.service
+    state: started
+    enabled: yes
+  tags:
+    - binaries
+    - install
+    - node

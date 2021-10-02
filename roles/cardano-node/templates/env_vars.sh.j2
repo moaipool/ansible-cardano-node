@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+export CNODE_HOME={{ cardano_install_dir }}
+export CARDANO_CLI="{{ cardamo_cli_path }}"
+export MAGIC_PARAM="{{ cardano_magic_prefix }}"
+export NODE_CONFIG="{{ cardano_node_config }}"
+export CARDANO_NODE_SOCKET_PATH=$CNODE_HOME/db/node.socket
+export CONFIG_JSON={{ cardano_config_dir }}/{{ cardano_config_filename }}
+export ALONZO_GENESIS_JSON={{ cardano_config_dir }}/{{ cardano_alonzo_genesis_filename }}
+export SHELLEY_GENESIS_JSON={{ cardano_config_dir }}/{{ cardano_shelley_genesis_filename }}
+export TOPOLOGY_JSON={{ cardano_config_dir }}/{{ cardano_topology_filename }}
+MAGIC=$(jq -r .protocolMagicId < $SHELLEY_GENESIS_JSON)
+NWMAGIC=$(jq -r .networkMagic < $SHELLEY_GENESIS_JSON)
+export NODE_TYPE="{{ cardano_node_type }}"
+export NODE_PORT="{{ cardano_default_port }}"

@@ -1,0 +1,22 @@
+# Send my tip to pooltool.io by QCPOL (part of systemd)
+# file: /etc/systemd/system/qcpolsendmytip.service
+
+[Unit]
+Description     = QCPOL - Send my tip to pooltool.io
+Wants           = network-online.target
+After           = network-online.target
+
+[Service]
+User            = {{ server_username }}
+Type            = simple
+WorkingDirectory= {{ cardano_install_dir }}/scripts
+ExecStart       = /bin/bash -c '{{ cardano_install_dir }}/scripts/qcpolsendmytip.sh'
+KillSignal=SIGINT
+RestartKillSignal=SIGINT
+TimeoutStopSec=2
+LimitNOFILE=32768
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy= multi-user.target

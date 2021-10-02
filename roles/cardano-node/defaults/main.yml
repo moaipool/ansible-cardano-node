@@ -1,0 +1,62 @@
+---
+
+# Server settings
+server_username: deploy
+
+# Cabal
+cabal_install_version: 3.2.0.0
+cabal_base_url: "https://downloads.haskell.org"
+cabal_install_url: "{{ cabal_base_url }}/~cabal/cabal-install-{{ cabal_install_version }}/cabal-install-{{ cabal_install_version }}-x86_64-unknown-linux.tar.xz"
+
+# GHC
+ghc_install_version: 8.10.4
+ghc_install_url: "https://downloads.haskell.org/~ghc/{{ ghc_install_version }}/ghc-{{ ghc_install_version }}-x86_64-deb9-linux.tar.xz"
+
+# Libsodium
+libsodium_github_url: "https://github.com/input-output-hk/libsodium"
+libsodium_version_tag:  "66f017f1"
+
+# Cluster configuration
+cardano_node_config: "mainnet"
+#cardano_node_config: "testnet"
+
+# Cardano
+cardano_node_build_number: "7416228"
+cardano_github_repo: "https://github.com/input-output-hk/cardano-node.git"
+cardano_github_release_url: "https://api.github.com/repos/input-output-hk/cardano-node/releases/latest"
+cardano_config_download: "https://hydra.iohk.io/build/{{ cardano_node_build_number }}/download/1/"
+cardano_version_tag: "1.30.1"
+cardano_install_dir: "/opt/cardano/cnode"
+cardamo_cli_path: "cardano-cli"
+cardano_config_dir: "{{ cardano_install_dir }}/configuration"
+cardano_scripts_dir: "{{ cardano_install_dir }}/scripts"
+cardano_config_filename: "{{ cardano_node_config }}-config.json"
+cardano_byron_genesis_filename: "{{ cardano_node_config }}-byron-genesis.json"
+cardano_shelley_genesis_filename: "{{ cardano_node_config }}-shelley-genesis.json"
+cardano_alonzo_genesis_filename: "{{ cardano_node_config }}-alonzo-genesis.json"
+cardano_topology_filename: "{{ cardano_node_config }}-topology.json"
+cardano_node_type: "block"
+
+# Alonzo Configuration
+cardano_alonzo_genesis: "https://hydra.iohk.io/build/7416228/download/1/{{ cardano_node_config }}-alonzo-genesis.json"
+cardano_shelly_test_config: "https://hydra.iohk.io/build/{{ node_build_num }}/download/1/{{ cardano_node_config }}-config.json"
+cardano_byron_test_genesis: "https://hydra.iohk.io/build/{{ node_build_num }}/download/1/{{ cardano_node_config }}-byron-genesis.json"
+cardano_shelly_test_genesis: "https://hydra.iohk.io/build/{{ node_build_num }}/download/1/{{ cardano_node_config }}-shelley-genesis.json"
+cardano_shelly_test_topology: "https://hydra.iohk.io/build/{{ node_build_num }}/download/1/{{ cardano_node_config }}-topology.json"
+cardano_magic_prefix: "--testnet-magic"
+
+# Monitoring tools
+cardano_community_cncli_uri: "https://github.com/AndrewWestberg/cncli/releases/download/"
+cardano_community_cncli_tag: "v3.1.5"
+cardano_community_cncli_version: "3.1.5"
+cardano_community_gliveview: "https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/gLiveView.sh"
+cardano_community_gliveview_env: "https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/env" 
+
+# Administration tools
+
+# Pool metadata
+cardano_pool_name: "My Cardano Stake Pool"
+cardano_pool_description: "A description of my stake pool"
+cardano_pool_ticker: "My Pool ticker symbol"
+cardano_pool_homepage: "https://mypool.com/"
+cardano_pool_extended: "https://mypool.com/extendedMetaData.json"

@@ -1,0 +1,7 @@
+---
+- include: install.yml
+- include: configure.yml
+- include: administer.yml
+  when: "'block-producer' in inventory_dir"
+- include: relay.yml
+  when: "'relay-node' in inventory_dir"

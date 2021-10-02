@@ -1,0 +1,6 @@
+# Cardano block-producer node group_vars 
+---
+
+# hostname
+server_hostname: cnode-blkprod01
+

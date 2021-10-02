@@ -1,0 +1,129 @@
+---
+# for Block producing nodes ONLY
+- name: "Administer Node | Install cncli latest release"
+  ansible.builtin.unarchive:
+    src: "{{ cardano_community_cncli_uri }}/{{ cardano_community_cncli_tag}}/cncli-{{ cardano_community_cncli_version}}-x86_64-unknown-linux-gnu.tar.gz"
+    dest: /usr/local/bin/
+    remote_src: yes
+  tags:
+    - administer
+
+# TODO: change the pool id in cncli-leaderlog.sh script
+- name: "Administer Node | Install cncli-leaderlog.sh to scripts"
+  template:
+    src: "{{ role_path }}/templates/cncli-leaderlog.sh"
+    dest: "{{ cardano_install_dir }}/scripts/cncli-leaderlog.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0755
+  tags:
+    - administer
+
+- name: "Administer Node | Install cncli-sendslots.sh to scripts"
+  template:
+    src: "{{ role_path }}/templates/cncli-sendslots.sh"
+    dest: "{{ cardano_install_dir }}/scripts/cncli-sendslots.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0755
+  tags:
+    - administer
+
+- name: "Administer Node | Install cncli-fivedays.sh to scripts"
+  template:
+    src: "{{ role_path }}/templates/cncli-fivedays.sh"
+    dest: "{{ cardano_install_dir }}/scripts/cncli-fivedays.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0755
+  tags:
+    - administer
+
+- name: "Administer Node | Install ledger-dump.sh to scripts"
+  template:
+    src: "{{ role_path }}/templates/ledger-dump.sh.j2"
+    dest: "{{ cardano_install_dir }}/scripts/ledger-dump.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0755
+  tags:
+    - administer
+
+# TODO: PoolTool Integration
+# See: https://www.coincashew.com/coins/overview-ada/guide-how-to-build-a-haskell-stakepool-node#pooltool-integration
+
+- name: "Administer Node | Install cncli-sync.service"
+  template: src={{ role_path }}/templates/cncli-sync.service.j2 dest=/etc/systemd/system/cncli-sync.service mode=u=rw,g=r,o= owner=root group=root
+  tags:
+    - administer
+    - service
+
+- name: "Administer Node | Install cncli-sendtip.service"
+  template: src={{ role_path }}/templates/cncli-sendtip.service.j2 dest=/etc/systemd/system/cncli-sendtip.service mode=u=rw,g=r,o= owner=root group=root
+  tags:
+    - administer
+    - service
+
+# TODO: Helper scripts, crontab
+# See: https://www.coincashew.com/coins/overview-ada/guide-how-to-build-a-haskell-stakepool-node#helper-scripts
+
+- name: "Administer Node | Install gLiveView monitoring tool"
+  get_url:
+    url: "{{ cardano_community_gliveview }}"
+    dest: "{{ cardano_install_dir }}/scripts/gLiveView.sh"
+    mode: 0755
+  become_user: "{{ server_username }}"
+  tags:
+    - administer
+
+- name: "Administer Node | Install gLiveView environment"
+  get_url:
+    url: "{{ cardano_community_gliveview_env }}"
+    dest: "{{ cardano_install_dir }}/scripts/env"
+    mode: 0755
+  become_user: "{{ server_username }}"
+  tags:
+    - administer
+
+# TODO: Complete task 
+# See: https://www.coincashew.com/coins/overview-ada/guide-how-to-build-a-haskell-stakepool-node#18-13-update-your-nodes-height-on-pooltool-io
+- name: "Administer Node | Install qcpol script to update pooltool.io"
+  template:
+    src: "{{ role_path }}/templates/qcpolsendmytip.sh.j2"
+    dest: "{{ cardano_install_dir }}/scripts/qcpolsendmytip.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0755
+  tags:
+    - administer
+    - qcpol 
+
+- name: "Administer Node | Install systemd service for qcpol update script"
+  template: src={{ role_path }}/templates/qcpolsendmytip.service.j2 dest=/etc/systemd/system/qcpolsendmytip.service mode=u=rw,g=r,o= owner=root group=root
+  tags:
+    - administer
+    - qcpol
+
+- name: "Administer Node | Create daily crontab entry to calculate slot assignment"
+  ansible.builtin.cron:
+    name: "calculate slots assignment for the next epoch"
+    minute: "21"
+    hour: "15"
+    job: "{{ cardano_install_dir }}/scripts/cncli-fivedays.sh && {{ cardano_install_dir }}/scripts/cncli-leaderlog.sh"
+  tags:
+    - administer
+    - crontab
+
+- name: "Administer Node | Create daily crontab entry to send slots to pooltool"
+  ansible.builtin.cron:
+    name: "send previous and current epochs slots to pooltool"
+    minute: "22"
+    hour: "15"
+    job: "{{ cardano_install_dir }}/scripts/cncli-fivedays.sh && {{ cardano_install_dir }}/scripts/cncli-sendslots.sh"
+  tags:
+    - administer
+    - crontab
+
+
+
+

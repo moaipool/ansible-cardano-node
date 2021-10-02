@@ -1,0 +1,6 @@
+---
+- name: "Configure Relay | Mitigate DoS/Syn attack by restricting connections"
+  shell: |
+    iptables -I INPUT -p tcp -m tcp --dport {{ cardano_default_port }} --tcp-flags FIN,SYN,RST,ACK SYN -m connlimit --connlimit-above 5 --connlimit-mask 32 --connlimit-saddr -j REJECT --reject-with tcp-reset
+  tags:
+    - relay

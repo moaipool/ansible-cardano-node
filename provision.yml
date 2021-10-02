@@ -1,0 +1,25 @@
+---
+- hosts: all
+  vars:
+    username: deploy
+    password: "{{ deploy_password }}"
+    public_key: ~/.ssh/id_rsa.pub
+  remote_user: root
+  gather_facts: false
+  become: true
+  become_method: sudo
+  pre_tasks:
+    - name: "include default vault"
+      include_vars:
+        file: inventories/vault
+    - name: "include default all.yml"
+      include_vars:
+        file: inventories/all.yml
+    - name: Gathering facts
+      setup:
+  roles:
+    - { role: ufw, become: yes }
+    - { role: ssh , become: yes }
+    - { role: common, become: yes }
+    - { role: cardano-node, become: yes }
+    

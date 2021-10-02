@@ -1,0 +1,37 @@
+#!/bin/bash
+# Send my tip to pooltool.io by QCPOL
+# BASED ON https://github.com/papacarp/pooltool.io/blob/master/sendmytip/shell/systemd/sendmytip.sh
+
+POOL_ID="CFG_MY_POOL_ID"
+API_KEY="CFG_MY_API_KEY"
+NODE_ID="CFG_MY_NODE_ID" # not used at the moment
+
+export CARDANO_NODE_SOCKET_PATH="CFG_MY_NODE_SOCKET_PATH"
+
+PLATFORM="QCPOL Stake Pool - Send Tip"
+CNODE=$(command -v cardano-node)
+CCLI=$(command -v cardano-cli)
+
+nodeVNumber=$("${CNODE}" --version | awk '/cardano-node/ {print $2}')
+nodeGitRev=$("${CNODE}" --version | awk '/rev/ {print $3}' | cut -c1-5)
+nodeVersion="$nodeVNumber":"$nodeGitRev"
+lastSentBlockHeight="-1"
+
+while true
+do
+    dateUtc=$(date '+%Y-%m-%dT%H:%M:%S.%2NZ')
+    nodeTip=$("${CCLI}" query tip --mainnet | jq -r '.slot, .hash, .block')
+    lastSlot=$(echo $nodeTip | cut -d' ' -f1)
+    lastBlockHash=$(echo $nodeTip | cut -d' ' -f2)
+    lastBlockHeight=$(echo $nodeTip | cut -d' ' -f3)
+
+    if [[ "$lastSentBlockHeight" != "$lastBlockHeight" && "$lastBlockHeight" != "" ]]; then
+        JSON="$(jq -n --compact-output --arg NODE_ID "$NODE_ID" --arg MY_API_KEY "$API_KEY" --arg MY_POOL_ID "$POOL_ID" --arg VERSION "$nodeVersion" --arg AT "$dateUtc" --arg BLOCKNO "$lastBlockHeight" --arg SLOTNO "$lastSlot" --arg PLATFORM "$PLATFORM" --arg BLOCKHASH "$lastBlockHash" '{apiKey: $MY_API_KEY, poolId: $MY_POOL_ID, data: {nodeId: $NODE_ID, version: $VERSION, at: $AT, blockNo: $BLOCKNO, slotNo: $SLOTNO, blockHash: $BLOCKHASH, platform: $PLATFORM}}')"
+
+        response="$(curl -s -H "Accept: application/json" -H "Content-Type:application/json" -X POST --data "$JSON" "https://api.pooltool.io/v0/sendstats")"
+
+        lastSentBlockHeight=$lastBlockHeight
+    fi
+
+    sleep 0.1
+done

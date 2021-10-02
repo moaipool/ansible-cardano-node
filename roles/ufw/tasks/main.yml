@@ -1,0 +1,60 @@
+---
+- name: Configure ufw defaults
+  ufw: direction={{ item.direction }} policy={{ item.policy }}
+  with_items:
+    - { direction: 'incoming', policy: 'deny' }
+    - { direction: 'outgoing', policy: 'allow' }
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: Set ufw allow port for relay-node
+  ufw: rule={{ item.rule }} port={{ item.port }} proto={{ item.proto }}
+  with_items:
+    - { rule: 'allow', port: '{{ cardano_default_port }}', proto: 'tcp' }
+  when: "'relay-node' in inventory_dir"
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: Set ufw allow port (restricted) for block-producer
+  ufw:
+    rule: allow
+    port: "{{ cardano_default_port }}"
+    proto: tcp
+    src: '{{ item }}'
+  with_items:
+    - "{{ relay_node_ips }}"
+  when: "'block-producer' in inventory_dir"
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: Restrict ssh to trusted IPs
+  ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+    src: '{{ item }}'
+  with_items:
+    - "{{ trusted_ips }}"
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: Enable ufw logging
+  ufw: logging=on
+  notify:
+    - restart ufw
+  tags:
+    - ufw
+
+- name: Enable firewall
+  ufw: state=enabled
+  tags:
+    - ufw
+

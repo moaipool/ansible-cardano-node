@@ -1,0 +1,151 @@
+---
+- name: "Configure Node | set node's public IP address"
+  set_fact:
+    host_address={{ ansible_ssh_host }}
+  tags:
+    - configure
+
+- name: "Configure Node | Create environment file for {{ server_username }}"
+  template:
+    src: "{{ role_path }}/templates/env_vars.sh.j2"
+    dest: "/home/{{ server_username }}/env_vars.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0644
+  tags:
+    - configure
+
+- name: "Configure Node | Create .bashrc file for {{ server_username }}"
+  file:
+    path: "/home/{{ server_username }}/.bashrc"
+    state: touch
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+  tags:
+    - configure
+
+- name: "Configure Node | Add environment file to .bashrc"
+  lineinfile:
+    dest: /home/{{ server_username }}/.bashrc
+    line: "{{ item }}"
+    owner: "{{ server_username }}"
+    create: yes
+  with_items:
+    - "source /home/{{ server_username }}/env_vars.sh"
+    - "source {{ cardano_scripts_dir }}/common.sh"
+  tags:
+    - configure
+    - bashrc
+
+- name: "Configure Node | Create node directory structure"
+  file:
+    path: "{{ cardano_install_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0744
+  with_items:
+    - configuration
+    - db
+    - logs
+    - scripts
+  tags:
+    - configure
+
+- name: "Configure Node | Copy scripts directory for node c/w all files"
+  copy:
+    src: cardano-scripts/
+    dest: "{{ cardano_scripts_dir }}"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0704
+  tags:
+    - configure
+
+- name: "Cardano Node | Copy startup template to scripts directory"
+  template:
+    src: "{{ role_path }}/templates/start-node.sh.j2"
+    dest: "{{ cardano_scripts_dir }}/start-node.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0704
+  tags:
+    - configure
+
+- name: "Cardano Node | Copy stop template to scripts directory"
+  template:
+    src: "{{ role_path }}/templates/stop-node.sh"
+    dest: "{{ cardano_scripts_dir }}/stop-node.sh"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0704
+  tags:
+    - configure
+
+- name: "Configure Node | Set node build number"
+  #shell: $(curl https://hydra.iohk.io/job/Cardano/iohk-nix/cardano-deployment/latest-finished/download/1/index.html | grep -e "build" | sed 's/.*build\/\([0-9]*\)\/download.*/\1/g')
+  #register: shell_output
+  set_fact:
+    node_build_num: '7416228'
+    #node_build_num: "{{ shell_output.stdout }}"
+  when: node_build_num is not defined
+  tags:
+    - configure
+    - download
+
+- name: "Configure Node | Download configurations (iohk)"
+  get_url:
+    url: "{{ cardano_config_download}}{{ cardano_node_config }}-{{ item}}.json"
+    dest: "{{ cardano_config_dir }}/"
+  become_user: "{{ server_username }}"
+  timeout: 25
+  retries: 0
+  with_items:
+    - "byron-genesis"
+    - "shelley-genesis"
+    - "alonzo-genesis"
+    - "config"
+  tags:
+    - configure
+    - download
+
+- name: "Configure Node | Update TraceBlockFetchDecisions to 'true'"
+  replace:
+    path: "{{ cardano_config_dir }}/{{ cardano_config_filename }}"
+    regexp: '(^\s{2,}"TraceBlockFetchDecisions":\s)false,'
+    replace: '\1true,'
+  tags:
+    - configure
+
+- name: "Configure Node | Install cardano-node service file"
+  template: src={{ role_path }}/templates/cardano-node.service.j2 dest=/etc/systemd/system/cardano-node.service mode=u=rw,g=r,o= owner=root group=root
+  tags:
+    - configure
+    - service
+
+- name: "Configure Node | Enable cardano-node service"
+  systemd: state=started name=cardano-node.service daemon_reload=yes
+  tags:
+    - configure
+    - service
+
+- name: "Configure Node | Ensure Cardano service does not start and bootstrap"
+  systemd:
+    name: cardano-node.service
+    state: stopped
+    enabled: no
+  tags:
+    - configure
+    - service
+
+- name: "Configure Node | Create pool metadata JSON file"
+  template:
+    src: "{{ role_path }}/templates/poolMetaData.json.j2"
+    dest: "{{ cardano_install_dir }}/poolMetaData.json"
+    owner: "{{ server_username }}"
+    group: "{{ server_username }}"
+    mode: 0704
+  tags:
+    - configure
+    - poolmeta
+ 

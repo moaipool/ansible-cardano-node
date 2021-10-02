@@ -1,0 +1,4 @@
+---
+
+# credentials
+deploy_password: "{{ vault_deploy_password }}"

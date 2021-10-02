@@ -1,0 +1,40 @@
+---
+- name: Install apt requirements
+  apt:
+    pkg: aptitude
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Upgrade existing packages 
+  apt:
+    update_cache: yes
+    upgrade: safe
+  ignore_errors: true
+
+- name: Install new packages
+  apt:
+    pkg:
+      - git-core
+      - ufw
+      - unattended-upgrades
+      - logrotate
+      - logwatch
+      - net-tools
+      - tmuxinator
+      - vim
+      - htop
+      - curl
+    state: present
+  tags: packages
+
+- name: Configure automatic updates
+  copy: src=apt_periodic dest=/etc/apt/apt.conf.d/10periodic
+  tags: packages
+
+- name: Set default shell to /bin/bash
+  command: "chsh -s /bin/bash {{ ansible_user }}"
+
+
+
+

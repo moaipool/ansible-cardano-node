@@ -1,0 +1,11 @@
+#!/bin/bash
+# TODO: environment variables are populated at runtime in env_vars.sh (maybe)
+
+/usr/bin/cardano-node run \
+  --topology {{ cardano_config_dir }}/{{ cardano_topology_filename }} \
+  --config {{ cardano_config_dir }}/{{ cardano_config_filename }} \
+  --database-path {{ cardano_install_dir }}/db \
+  --socket-path {{ cardano_install_dir }}/db/node.socket \
+  --host-addr {{ host_address }} \
+  --port {{ cardano_default_port }} \
+  

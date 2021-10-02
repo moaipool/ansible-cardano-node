@@ -1,0 +1,18 @@
+#!/bin/bash
+# Environment variables are populated at runtime in env_vars.sh
+# BZ note: currently unused
+
+DIRECTORY=$CNODE_HOME
+HOSTADDR=0.0.0.0
+TOPOLOGY=${DIRECTORY}/configuration/${NODE_CONFIG}-topology.json
+DB_PATH=${DIRECTORY}/db
+SOCKET_PATH=${DIRECTORY}/db/node.socket
+CONFIG_JSON=${DIRECTORY}/configuration/${NODE_CONFIG}-config.json
+
+/usr/bin/cardano-node run \
+  --topology ${TOPOLOGY} \
+  --database-path ${DB_PATH} \
+  --socket-path ${SOCKET_PATH} \
+  --host-addr ${HOSTADDR} \
+  --port ${NODE_PORT} \
+  --config ${CONFIG_JSON}
