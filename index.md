@@ -5,7 +5,7 @@ Ansible playbook for provisioning a Cardano stake pool
 
 ## Overview
 
-This repository contains an [Ansible](https://www.ansible.com/) playbook for provisioning secure, optimized Cardano nodes for Stake Pool Operators (SPOs). It was originally developed for the **MOAI Pool** (Ticker: **MOAI**) but is now being made available to the greater Cardano community.
+This repository contains an [Ansible](https://www.ansible.com/) playbook for provisioning secure, optimized Cardano nodes for Stake Pool Operators (SPOs). It was originally developed for the [MOAI Pool](https://moaipool.com/) (Ticker: **MOAI**) but is now being made available to the greater Cardano community.
 
 If you find this useful for maintaining your own stake pool or for other applications, please consider staking to MOAI. It means a great deal to us!
 
