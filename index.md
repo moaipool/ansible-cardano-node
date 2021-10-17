@@ -52,7 +52,7 @@ Commands executed via Ansible are [_idempotent_](https://en.wikipedia.org/wiki/I
 Ansible is an incredibly popular [open source project](https://github.com/ansible/ansible) with [hundreds of available modules](https://docs.ansible.com/ansible/2.8/modules/list_of_all_modules.html). For more answers to the 'why?' question, check out Red Hat's announcement of [Ansible's acquisition](https://www.redhat.com/en/blog/why-red-hat-acquired-ansible) and [this post](https://hvops.com/articles/ansible-vs-shell-scripts/) comparing Ansible with other popular configuration management tools. 
 
 ## Installation
-A single control machine can be setup to execute Ansible commands. The example below uses OS X, but any platform with Python installed will work (yes, including [Windows](https://docs.ansible.com/ansible/latest/intro_windows.html) 😉).
+A single control machine can be setup to execute Ansible commands. The example below uses OS X, but any platform with Python installed will work (including [Windows](https://docs.ansible.com/ansible/latest/intro_windows.html)).
 
 >**Note:** Ansible is written in Python, but it isn't necessary to code in Python. You never have to touch Python unless you want to. The Ansible scripts themselves are written in the very simple YAML format. 
 
