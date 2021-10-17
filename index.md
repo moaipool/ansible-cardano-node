@@ -1,4 +1,4 @@
-![ansible_logo](https://user-images.githubusercontent.com/229399/29353466-7ed8b61c-826a-11e7-8011-1e879efad093.png)
+![ansible-cardano](https://user-images.githubusercontent.com/84546123/137635107-1b183f63-3cac-4ef9-be9e-3f116cb79aef.png)
 
 # ansible-cardano-node
 Ansible playbook for provisioning a Cardano stake pool 
