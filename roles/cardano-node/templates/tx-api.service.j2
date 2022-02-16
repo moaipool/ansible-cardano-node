@@ -1,0 +1,22 @@
+# The {{ cardano_tx_submit_description }} service
+# file: /etc/systemd/system/tx-api.service 
+
+[Unit]
+Description             = {{ cardano_tx_submit_description }}
+After                   = network-online.target
+
+[Service]
+Type                    = simple
+Restart                 = on-failure
+RestartSec              = 10
+User                    = {{ server_username }}
+ExecStart               = /bin/bash -l -c "exec {{ cardano_scripts_dir }}/tx-api.sh"
+SuccessExitStatus       = 143
+StandardOutput          = syslog
+StandardError           = syslog
+SyslogIdentifier        = {{ cardano_tx_submit_syslog_id }}
+TimeoutStopSec          = 2
+KillMode                = mixed
+
+[Install]
+WantedBy                = multi-user.target

@@ -1,0 +1,6 @@
+/usr/bin/cardano-submit-api \
+  --config /home/{{ server_username }}/cardano-node/{{ cardano_submit_api_config_dir }}/tx-submit-mainnet-config.yaml \
+  --socket-path {{ cardano_install_dir }}/db/node.socket \
+  --listen-address {{ cardano_tx_submit_address }} \
+  --port {{ cardano_tx_submit_port }} \
+  --{{ cardano_node_config }}
