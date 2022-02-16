@@ -52,7 +52,17 @@ cardano_community_cncli_version: "3.1.5"
 cardano_community_gliveview: "https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/gLiveView.sh"
 cardano_community_gliveview_env: "https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/env" 
 
-# Administration tools
+# Cardano submit API (optional)
+cardano_submit_api: false
+cardano_submit_api_config_dir: "cardano-submit-api/config"
+cardano_submit_api_config_filename: "tx-submit-mainnet-config.yaml"
+cardano_tx_submit_mainnet_config: "https://raw.githubusercontent.com/input-output-hk/cardano-node/master/cardano-submit-api/config/tx-submit-mainnet-config.yaml"
+cardano_tx_submit_service: "tx-api.service"
+cardano_tx_submit_description: "Cardano TX Submit API"
+cardano_tx_submit_syslog_id: "cardano-tx-api"
+cardano_tx_submit_address: "0.0.0.0"
+cardano_tx_submit_port: "8090"
+overwrite_policy: "--overwrite-policy=always"
 
 # Pool metadata
 cardano_pool_name: "My Cardano Stake Pool"

@@ -196,3 +196,76 @@
     - binaries
     - install
     - node
+
+- name: "Node API Install | Update cabal"
+  shell: cabal update
+  when:
+    - "'relay-node' in inventory_dir"
+    - cardano_submit_api
+  tags:
+    - binaries
+    - install
+    - api
+
+- name: "Node API Install | Install cardano-node-api"
+  command: chdir=/home/{{ server_username }}/cardano-node cabal install cardano-submit-api {{ overwrite_policy }}
+  when:
+    - "'relay-node' in inventory_dir"
+    - cardano_submit_api
+  tags:
+    - binaries
+    - install
+    - api
+
+- name: "Node API Install | Copy cardano-node-api binary to /usr/bin for systemd control"
+  shell: |
+    cp $(find /home/{{ server_username }}/.cabal/bin/ -type f -name "cardano-submit-api") /usr/bin/cardano-submit-api
+  when:
+    - "'relay-node' in inventory_dir"
+    - cardano_submit_api
+  tags:
+    - binaries
+    - install
+    - api
+
+- name: "Node API Install | Ensure cardano-submit-api configuration (iohk) exists"
+  stat:
+    path: "/home/{{ server_username }}/cardano-node/{{ cardano_submit_api_config_dir }}/{{ cardano_submit_api_config_filename }}"
+  register: result
+  when:
+    - "'relay-node' in inventory_dir"
+    - cardano_submit_api
+  tags:
+    - install
+    - api
+
+- name: "Node API Install | Download cardano-submit-api configuration (iohk)"
+  get_url:
+    url: "{{ cardano_tx_submit_mainnet_config}}"
+    dest: "/home/{{ server_username }}/cardano-node/{{ cardano_submit_api_config_dir }}"
+  become_user: "{{ server_username }}"
+  when:
+    - "'relay-node' in inventory_dir"
+    - cardano_submit_api
+    - not result.stat.exists
+  tags:
+    - install
+    - api
+
+- name: "Node API Install | Install tx-api.sh startup script"
+  template: src={{ role_path }}/templates/tx-api.sh.j2 dest={{ cardano_scripts_dir }}/tx-api.sh mode=u=rw,g=r,o= owner={{ server_username }} group={{ server_username }}
+  tags:
+    - install
+    - api
+
+- name: "Node API Install | Install tx-api.service systemd file"
+  template: src={{ role_path }}/templates/tx-api.service.j2 dest=/etc/systemd/system/{{ cardano_tx_submit_service }} mode=u=rw,g=r,o= owner=root group=root
+  tags:
+    - install
+    - api
+
+- name: "Node API Install | Enable cardano-tx-api service"
+  systemd: state=started name={{ cardano_tx_submit_service }} daemon_reload=yes
+  tags:
+    - install
+    - api
