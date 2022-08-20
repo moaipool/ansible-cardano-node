@@ -335,7 +335,7 @@ ansible-playbook provision.yml -i inventories/relay-node --vault-password-file ~
 
 The associated tasks will handle the build process and installation of `cardano-submit-api` to `/usr/bin`. It will also check for and, optionally, download IOHK's [mainnet base configuration settings](https://raw.githubusercontent.com/input-output-hk/cardano-node/master/cardano-submit-api/config/tx-submit-mainnet-config.yaml).
 
-Finally, two scripts are created: 1) `tx-api.sh` is added to `/opt/cardano/cnode/scripts` to handle startup of the API, and 2) `tx-api.service` is installed to `/etc/systemd/system` and enabled. The latter `systemd` service allows the API to started and its running status to be checked, like so:
+Finally, two scripts are created: 1) `tx-api.sh` is added to `/opt/cardano/cnode/scripts` to handle startup of the API, and 2) `tx-api.service` is installed to `/etc/systemd/system` and enabled. The latter `systemd` service allows the API to be started and its running status to be checked, like so:
 
 ```
 sudo systemctl start tx-api.service
