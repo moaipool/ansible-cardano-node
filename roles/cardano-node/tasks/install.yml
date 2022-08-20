@@ -148,7 +148,6 @@
   git:
     repo: "{{ secp256k1_github_url }}"
     dest: /home/{{ server_username }}/src/secp256k1
-    version: "{{ secp256k1_tag }}"
     clone: yes
     accept_hostkey: yes
   register: repo_download
@@ -160,10 +159,22 @@
 - name: "Node Install | Build libsecp256k1 "
   shell: |
     cd /home/{{ server_username }}/src/secp256k1
+    git checkout {{ secp256k1_tag }}
     ./autogen.sh
     ./configure --enable-module-schnorrsig --enable-experimental
     make
-    sudo make install
+    make check
+    make install
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Create Symlink to libsecp256k1 binary"
+  file:
+    src: "/usr/local/lib/libsecp256k1.so.0"
+    dest: "/usr/lib/libsecp256k1.so.0"
+    state: link
+    force: yes
   tags:
     - install
     - node

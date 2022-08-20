@@ -4,12 +4,12 @@
 server_username: deploy
 
 # Cabal
-cabal_install_version: 3.2.0.0
+cabal_install_version: 3.6.2.0
 cabal_base_url: "https://downloads.haskell.org"
 cabal_install_url: "{{ cabal_base_url }}/~cabal/cabal-install-{{ cabal_install_version }}/cabal-install-{{ cabal_install_version }}-x86_64-unknown-linux.tar.xz"
 
 # GHC
-ghc_install_version: 8.10.4
+ghc_install_version: 8.10.7
 ghc_install_url: "https://downloads.haskell.org/~ghc/{{ ghc_install_version }}/ghc-{{ ghc_install_version }}-x86_64-deb9-linux.tar.xz"
 
 # Libsodium
