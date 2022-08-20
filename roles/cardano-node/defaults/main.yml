@@ -16,6 +16,10 @@ ghc_install_url: "https://downloads.haskell.org/~ghc/{{ ghc_install_version }}/g
 libsodium_github_url: "https://github.com/input-output-hk/libsodium"
 libsodium_version_tag:  "66f017f1"
 
+# Libsecp256k1
+secp256k1_github_url: "https://github.com/bitcoin-core/secp256k1"
+secp256k1_tag: "ac83be33"
+
 # Cluster configuration
 cardano_node_config: "mainnet"
 #cardano_node_config: "testnet"

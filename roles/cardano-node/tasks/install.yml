@@ -99,25 +99,6 @@
   tags:
     - install
         
-# Note: github_release requires annoyingly unpackaged python module requirement github3.py
-# curl is used here instead
-# - name: "Node Install | Fetch Cardano source latest release tag"
-#   shell:
-#     #cmd: curl --silent "{{ cardano_github_release_url }}" |  grep '"tag_name":' | cut -d'"' -f4
-#     cmd: curl --silent "{{ cardano_github_release_url }}" | grep -Po '"tag_name": "\K.*?(?=")'
-#     warn: false
-#   register: shell_output
-#   tags:
-#     - install
-#     - node
-
-# - name: "Node Install | Set fact Cardano latest release tag"
-#   set_fact:
-#     cardano_release_tag: "{{ shell_output.stdout_lines }}"
-#   tags:
-#     - install
-#     - node
-
 - name: "Node Install | Release version {{ cardano_version_tag }}"
   debug:
     var: cardano_version_tag
@@ -159,6 +140,30 @@
 
 - name: "Node Install | Update Cabal in {{ server_username }} home directory"
   shell: cd /home/{{ server_username }}/cardano-node && cabal update
+  tags:
+    - install
+    - node
+
+- name: "Node Install | Clone libsecp256k1 repo"
+  git:
+    repo: "{{ secp256k1_github_url }}"
+    dest: /home/{{ server_username }}/src/secp256k1
+    version: "{{ secp256k1_tag }}"
+    clone: yes
+    accept_hostkey: yes
+  register: repo_download
+  tags:
+    - install
+    - node
+    - git
+
+- name: "Node Install | Build libsecp256k1 "
+  shell: |
+    cd /home/{{ server_username }}/src/secp256k1
+    ./autogen.sh
+    ./configure --enable-module-schnorrsig --enable-experimental
+    make
+    sudo make install
   tags:
     - install
     - node
